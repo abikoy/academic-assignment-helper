@@ -40,11 +40,11 @@ Thumbs.db
 # Docker
 *.log
 
-# Uploads
+# Uploads (exclude user uploaded files, but keep requirements.txt)
 uploads/
 *.pdf
 *.docx
-*.txt
+uploads/*.txt
 
 # Database
 *.db

@@ -1,0 +1,33 @@
+# FastAPI and web server
+fastapi==0.104.1
+uvicorn==0.24.0
+
+# File handling
+python-multipart==0.0.6
+
+# Database
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+pgvector==0.2.3
+
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib==1.7.4
+bcrypt==4.0.1
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Data validation
+pydantic==2.4.2
+email-validator==2.1.0.post1
+
+# OpenAI for embeddings
+openai==1.3.5
+httpx==0.24.1
+
+# Token counting
+tiktoken==0.5.1
+
+# HTTP requests
+requests==2.31.0
