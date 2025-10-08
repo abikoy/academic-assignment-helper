@@ -58,24 +58,42 @@ academic-assignment-helper/
 └── README.md                # This file
 ```
 
-## 🚀 Quick Start
+## 🚀 Quick Start with Docker Compose
 
-### Step 1: Prerequisites
+### Prerequisites
 
-Install these on your computer:
-- [Docker Desktop](https://www.docker.com/products/docker-desktop)
-- [Git](https://git-scm.com/downloads)
+Before you begin, ensure you have the following installed:
+- **Docker Desktop** (version 20.10 or higher)
+  - Windows: [Download Docker Desktop for Windows](https://www.docker.com/products/docker-desktop)
+  - Mac: [Download Docker Desktop for Mac](https://www.docker.com/products/docker-desktop)
+  - Linux: [Install Docker Engine](https://docs.docker.com/engine/install/)
+- **Docker Compose** (included with Docker Desktop, or install separately on Linux)
+- **Git** (optional, for cloning): [Download Git](https://git-scm.com/downloads)
 
-### Step 2: Clone or Navigate to Project
+### Step 1: Get the Project
 
+**Option A: Clone from GitHub**
 ```bash
+git clone https://github.com/YOUR_USERNAME/academic-assignment-helper.git
 cd academic-assignment-helper
 ```
 
-### Step 3: Setup Environment Variables
+**Option B: Download ZIP**
+- Download the project ZIP file
+- Extract it to a folder
+- Open terminal/command prompt in that folder
 
-**On Windows:**
-```bash
+### Step 2: Configure Environment Variables
+
+Create a `.env` file from the template:
+
+**On Windows (PowerShell):**
+```powershell
+Copy-Item .env.example .env
+```
+
+**On Windows (Command Prompt):**
+```cmd
 copy .env.example .env
 ```
 
@@ -84,20 +102,51 @@ copy .env.example .env
 cp .env.example .env
 ```
 
-Then edit `.env` file and add your keys:
-```
-OPENAI_API_KEY=sk-your-actual-api-key-here
-JWT_SECRET_KEY=my-super-secret-key-change-this
+**Edit the `.env` file** and add your actual values:
+
+```bash
+# Database configuration
+DATABASE_URL=postgresql://student:secure_password@db:5432/academic_helper
+
+# JWT Authentication (change this!)
+JWT_SECRET_KEY=your-super-secret-jwt-key-here-change-this
+
+# OpenAI API Key (get from https://platform.openai.com/api-keys)
+OPENAI_API_KEY=sk-proj-your-actual-openai-api-key-here
+
+# n8n Webhook URL (leave as is)
+N8N_WEBHOOK_URL=http://n8n:5678/webhook/assignment
 ```
 
-### Step 4: Start the Application
+> **⚠️ Important:** Never commit the `.env` file to Git! It contains your secrets.
 
-**First time setup (builds everything):**
+### Step 3: Start All Services with Docker Compose
+
+**First time setup (builds and starts everything):**
 ```bash
 docker-compose up --build
 ```
 
-**Regular start (after first time):**
+This command will:
+1. ✅ Build the FastAPI backend Docker image
+2. ✅ Pull PostgreSQL with pgvector extension
+3. ✅ Pull n8n workflow automation
+4. ✅ Pull pgAdmin database management tool
+5. ✅ Create a Docker network for services to communicate
+6. ✅ Start all containers
+7. ✅ Initialize the database with tables
+8. ✅ Load sample academic sources (if OpenAI API key is valid)
+
+**Wait for these messages:**
+```
+✅ Database tables created successfully!
+📚 Checking academic sources database...
+✅ Successfully added 3 academic sources to database
+✅ Server started successfully!
+INFO:     Uvicorn running on http://0.0.0.0:8000
+```
+
+**After first time (regular start):**
 ```bash
 docker-compose up
 ```
@@ -107,18 +156,35 @@ docker-compose up
 docker-compose up -d
 ```
 
-Wait 30-60 seconds for all services to start. You'll see:
-- ✅ Database running on port 5432
-- ✅ Backend API running on port 8000
-- ✅ n8n running on port 5678
-- ✅ pgAdmin running on port 5050
+Wait 30-60 seconds for all services to start.
+
+### Step 4: Verify All Services Are Running
+
+Check that all containers are up:
+```bash
+docker-compose ps
+```
+
+You should see:
+```
+NAME               STATUS              PORTS
+academic_backend   Up                  0.0.0.0:8000->8000/tcp
+academic_db        Up (healthy)        0.0.0.0:5432->5432/tcp
+academic_n8n       Up                  0.0.0.0:5678->5678/tcp
+academic_pgadmin   Up                  0.0.0.0:5050->80/tcp
+```
 
 ### Step 5: Access the Services
 
-- **API Documentation**: http://localhost:8000/docs
-- **API Health Check**: http://localhost:8000/health
-- **n8n Workflow**: http://localhost:5678
-- **pgAdmin (Database)**: http://localhost:5050 (login: admin@example.com / admin)
+Once all containers are running, you can access:
+
+| Service | URL | Purpose | Credentials |
+|---------|-----|---------|-------------|
+| **Backend API** | http://localhost:8000/docs | Interactive API documentation | JWT token required for protected endpoints |
+| **Health Check** | http://localhost:8000/health | Check if API is running | No auth needed |
+| **n8n Workflow** | http://localhost:5678 | Workflow automation platform | Create account on first visit |
+| **pgAdmin** | http://localhost:5050 | Database management GUI | Email: `admin@example.com`<br>Password: `admin` |
+| **PostgreSQL** | localhost:5432 | Database (direct connection) | User: `student`<br>Password: `secure_password`<br>Database: `academic_helper` |
 
 ## 📋 Essential Commands
 
@@ -590,6 +656,118 @@ curl http://localhost:8000/health
 | Access database | http://localhost:5050 |
 | Access n8n | http://localhost:5678 |
 
+## 🔧 Troubleshooting Docker Compose
+
+### Problem: Containers won't start
+
+**Check Docker is running:**
+```bash
+docker --version
+docker-compose --version
+```
+
+**View logs to see errors:**
+```bash
+docker-compose logs
+```
+
+### Problem: Port already in use
+
+**Error:** `Bind for 0.0.0.0:8000 failed: port is already allocated`
+
+**Solution:** Stop the service using that port or change the port in `docker-compose.yml`:
+```yaml
+ports:
+  - "8001:8000"  # Change 8000 to 8001
+```
+
+### Problem: Database connection failed
+
+**Check database is healthy:**
+```bash
+docker-compose ps
+# Look for "Up (healthy)" next to academic_db
+```
+
+**Wait longer:** Database takes 20-30 seconds to initialize
+
+**Restart database:**
+```bash
+docker-compose restart db
+```
+
+### Problem: Backend shows errors
+
+**View backend logs:**
+```bash
+docker-compose logs -f backend
+```
+
+**Common issues:**
+- Missing `.env` file → Create from `.env.example`
+- Invalid OpenAI API key → Check your key at https://platform.openai.com/api-keys
+- Database not ready → Wait 30 seconds and restart backend
+
+**Rebuild backend:**
+```bash
+docker-compose stop backend
+docker-compose build backend
+docker-compose up -d backend
+```
+
+### Problem: Out of disk space
+
+**Clean up Docker:**
+```bash
+# Remove unused images and containers
+docker system prune -a
+
+# Remove volumes (WARNING: deletes all data!)
+docker-compose down -v
+```
+
+### Problem: Need fresh start
+
+**Complete reset:**
+```bash
+# Stop everything
+docker-compose down -v
+
+# Remove images
+docker rmi academic-assignment-helper-backend
+
+# Rebuild from scratch
+docker-compose up --build
+```
+
+### Problem: OpenAI quota exceeded
+
+**Error:** `Error code: 429 - You exceeded your current quota`
+
+**Solution:** 
+- Add credits to your OpenAI account at https://platform.openai.com/account/billing
+- Or continue without embeddings (academic sources will be added without vector embeddings)
+
+### Getting Help
+
+**View all container logs:**
+```bash
+docker-compose logs
+```
+
+**View specific service logs:**
+```bash
+docker-compose logs backend
+docker-compose logs db
+docker-compose logs n8n
+```
+
+**Check container status:**
+```bash
+docker-compose ps
+docker inspect academic_backend
+```
+
 ## 🎓 Learning Resources
 
 ### Understanding the Technologies:
@@ -600,6 +778,7 @@ curl http://localhost:8000/health
 - **RAG**: Retrieval Augmented Generation for AI
 - **Docker**: Containerization for easy deployment
 - **n8n**: No-code workflow automation
+- **Docker Compose**: Multi-container Docker applications
 
 ### Key Concepts:
 - **Embeddings**: Converting text to numbers (vectors) for comparison
