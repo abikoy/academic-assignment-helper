@@ -74,7 +74,7 @@ Before you begin, ensure you have the following installed:
 
 **Option A: Clone from GitHub**
 ```bash
-git clone https://github.com/YOUR_USERNAME/academic-assignment-helper.git
+git clone https://github.com/abikoy/academic-assignment-helper.git
 cd academic-assignment-helper
 ```
 
@@ -240,7 +240,7 @@ docker-compose down -v
    {
      "email": "student@example.com",
      "password": "password123",
-     "full_name": "John Doe",
+     "full_name": "Haile Kinfu",
      "student_id": "STU001"
    }
    ```
@@ -259,10 +259,16 @@ docker-compose down -v
 
 #### 3. Authorize Your Requests
 
-1. Click the **"Authorize"** button at the top of the page (🔓 icon)
-2. Paste your token in the "Value" field
-3. Click "Authorize"
-4. Click "Close"
+ Authorize Your Session
+Open the Authorization Dialog: Click the "Authorize" button (or the lock icon 🔓) at the top of the Swagger UI page.
+
+Enter Credentials: In the dialog box that appears:
+
+Enter a valid username (e.g. student@example.com).
+
+Enter the corresponding password (e.g. password123).
+
+Confirm and Close: Click the "Authorize" button at the bottom of the dialog, then click "Close".
 5. Now you're logged in! 🎉
 
 #### 4. Upload an Assignment
@@ -296,7 +302,7 @@ curl -X POST "http://localhost:8000/auth/register" \
   -d '{
     "email": "student@example.com",
     "password": "password123",
-    "full_name": "John Doe",
+    "full_name": "Haile Kinfu",
     "student_id": "STU001"
   }'
 ```
@@ -787,12 +793,4 @@ docker inspect academic_backend
 - **API Endpoint**: A URL that performs a specific function
 - **Webhook**: A way for services to notify each other
 
-## 📄 License
 
-This project is for educational purposes.
-
----
-
-**Made with ❤️ for students and educators**
-
-For questions or issues, check the logs with `docker-compose logs`
