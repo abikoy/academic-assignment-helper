@@ -1,0 +1,83 @@
+services:
+  # PostgreSQL Database with pgvector extension
+  db:
+    image: ankane/pgvector:latest
+    container_name: academic_db
+    environment:
+      - POSTGRES_DB=academic_helper
+      - POSTGRES_USER=student
+      - POSTGRES_PASSWORD=secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - academic-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U student -d academic_helper"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: academic_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://student:secure_password@db:5432/academic_helper
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-secret-key-change-this}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-your-openai-api-key-here}
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/assignment
+    volumes:
+      - ./backend:/app
+      - ./data:/app/data
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - academic-network
+
+  # n8n Workflow Automation
+  n8n:
+    image: n8nio/n8n
+    container_name: academic_n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=n8n
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://n8n:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - academic-network
+    depends_on:
+      - db
+
+  # pgAdmin (Database Management UI)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: academic_pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    networks:
+      - academic-network
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
+  n8n_data:
+  uploads:
+networks:
+  academic-network:
+    driver: bridge

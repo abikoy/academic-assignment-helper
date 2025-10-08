@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Introduction to Machine Learning",
+    "authors": "Tom Mitchell",
+    "publication_year": 2020,
+    "abstract": "This paper provides a comprehensive introduction to machine learning concepts and algorithms.",
+    "full_text": "Machine learning is a field of artificial intelligence that focuses on building systems that can learn from data...",
+    "source_type": "paper"
+  },
+  {
+    "title": "Deep Learning Fundamentals",
+    "authors": "Ian Goodfellow, Yoshua Bengio",
+    "publication_year": 2021,
+    "abstract": "A foundational text covering neural networks and deep learning architectures.",
+    "full_text": "Deep learning has revolutionized artificial intelligence by enabling computers to learn hierarchical representations...",
+    "source_type": "textbook"
+  },
+  {
+    "title": "Natural Language Processing Basics",
+    "authors": "Christopher Manning",
+    "publication_year": 2019,
+    "abstract": "An overview of NLP techniques and applications in modern AI systems.",
+    "full_text": "Natural language processing enables computers to understand and generate human language...",
+    "source_type": "course_material"
+  }
+]

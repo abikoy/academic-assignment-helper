@@ -1,0 +1,45 @@
+{
+  "name": "Assignment Analysis Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "assignment",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract assignment data\nconst assignmentId = items[0].json.assignment_id;\nconst studentId = items[0].json.student_id;\nconst filePath = items[0].json.file_path;\nconst topic = items[0].json.topic;\n\nreturn [\n  {\n    json: {\n      assignment_id: assignmentId,\n      student_id: studentId,\n      file_path: filePath,\n      topic: topic,\n      status: 'processing'\n    }\n  }\n];"
+      },
+      "name": "Process Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO analysis_results (assignment_id, research_suggestions, citation_recommendations, confidence_score) VALUES ({{ $json.assignment_id }}, 'AI-generated suggestions', 'Use APA format', 0.9)",
+        "options": {}
+      },
+      "name": "Store Results",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [650, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Process Data", "type": "main", "index": 0}]]
+    },
+    "Process Data": {
+      "main": [[{"node": "Store Results", "type": "main", "index": 0}]]
+    }
+  }
+}
